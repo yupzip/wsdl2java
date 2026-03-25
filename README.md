@@ -2,8 +2,8 @@
 
 * Version 4.0.0
   * Plugin built with Gradle 9.4.1
-  * CXF Tool version 4.1.2
-  * CXF Plugin version 4.1.2
+  * CXF Tool version 4.1.2 (cxfVersion property removed)
+  * CXF Plugin version 4.1.2 (cxfPlugin property removed)
   * CXF Tools version 4.2.0
   * JAXB2 naming prefix version 2.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
   * JAXB2 basic plugins version 3.0.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
@@ -15,7 +15,7 @@
 
 wsdl2java gradle plugin
 =========
-Gradle plugin for generating java from wsdl, using cxf under the hood and the same options as the maven wsdl-2-java plugin from apache-cxf.
+Gradle plugin for generating java classes from wsdl using CXF under the hood.
 
 ### Issues
 If you have any issues with the plugin, please file an issue at github, https://github.com/yupzip/wsdl2java/issues
