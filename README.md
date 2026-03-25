@@ -72,11 +72,6 @@ plugins {
 | locale                         | Locale.getDefault()       | The locale for the generated sources – especially the JavaDoc. This might be necessary to prevent differing sources due to several development environments.                                                                                                                                                                                                 |
 | encoding                       | platform default encoding | Set the encoding name for generated sources, such as EUC-JP or UTF-8.                                                                                                                                                                                                                                                                                        |
 | stabilizeAndMergeObjectFactory | false                     | If multiple WSDLs target the same package, merge their `ObjectFactory` classes.                                                                                                                                                                                                                                                                              |
-| cxfVersion                     | optional (4.1.2 default)  | Controls the CXF version used to generate code.                                                                                                                                                                                                                                                                                                              |
-| cxfPluginVersion               | optional (4.1.2 default)  | Controls the CXF XJC-plugins version used to generate code.                                                                                                                                                                                                                                                                                                  |
-| cxfToolsVersion                | optional (4.2.0 default)  | Controls the CXF XJC-tools version used to generate code.                                                                                                                                                                                                                                                                                                    |
-| namespacePrefixVersion         | optional                  | Optional dependency for namespace prefix.                                                                                                                                                                                                                                                                                                                    |                                                                                                                                                                                                                                      |
-| jax2bBasicsVersion             | optional                  | Optional dependency for basic jax2b plugins.                                                                                                                                                                                                                                                                                                                 |                                                                                                                                                                                                                                           |
 
 Example setting of options:
 
@@ -84,25 +79,20 @@ Groovy:
 
 ```groovy
 wsdl2java {
-    wsdlDir = file("src/main/resources/myWsdlFiles") // define to support incremental build
+    wsdlDir = "src/main/resources/myWsdlFiles"
     wsdlsToGenerate = [   //  2d-array of wsdls and cxf-parameters
             ['src/main/resources/wsdl/firstwsdl.wsdl'],
             ['-xjc','-b','bindingfile.xml','src/main/resources/wsdl/secondwsdl.wsdl']
     ]
     locale = Locale.GERMANY
-    cxfVersion = "4.0.0"
-    cxfPluginVersion = "4.0.0"
 }
 ```
     
 Kotlin:
 
 ```kotlin
-extra["cxfVersion"] = "4.0.0"
-extra["cxfPluginVersion"] = "4.0.0"
-
 wsdl2java {
-    wsdlDir = file("$projectDir/src/main/wsdl")
+    wsdlDir = "$projectDir/src/main/wsdl"
     wsdlsToGenerate = listOf(
         listOf("$wsdlDir/firstwsdl.wsdl"),
         listOf("-xjc", "-b", "bindingfile.xml", "$wsdlDir/secondwsdl.wsdl")
@@ -158,10 +148,8 @@ configurations {
 }
 
 wsdl2java {
-    wsdlDir = file("$projectDir/src/main/resources/wsdl/")
+    wsdlDir = "$projectDir/src/main/resources/wsdl/"
     stabilizeAndMergeObjectFactory = true
-    cxfVersion = "4.0.0"
-    cxfPluginVersion = "4.0.0"
     wsdlsToGenerate = [
             ['-xjc',
              '-xjc-Xnamespace-prefix',
