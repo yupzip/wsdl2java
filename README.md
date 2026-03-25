@@ -31,6 +31,7 @@ Contributions are welcome.
 #### Contributors
 - Peter Vermes , https://github.com/yupzip
 - Nicklas Bondesson , https://github.com/nicklasbondesson
+- https://github.com/cstsw
 
 ### CXF
 This plugin uses the apache-cxf tools to do the actual work.
