@@ -1,7 +1,7 @@
 ### Note
 
 * Version 4.0.0
-  * Plugin build with Gradle 9.4.1
+  * Plugin built with Gradle 9.4.1
   * cxfVersion - 4.1.2 default
   * cxfPluginVersion - 4.1.2 default
   * cxfToolsVersion - 4.1.2 default
