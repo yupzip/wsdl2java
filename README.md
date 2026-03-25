@@ -7,7 +7,7 @@
   * CXF Plugin version 4.1.2 (cxfPlugin property removed)
   * CXF Tools version 4.2.0
   * JAXB2 naming prefix version 2.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
-  * JAXB2 basic plugins version 3.0.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
+  * JAXB2 basic plugins version 3.0.0 (org.codes.rafael.jaxb2_commons:jaxb2-basics)
   * wsdlDir property is now a string
   * generatedWsdlDir property is now a string
   * inclusion of generated classes in source to be configured in build.gradle, e.g.:
