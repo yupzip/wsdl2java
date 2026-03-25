@@ -1,53 +1,40 @@
 package com.yupzip.wsdl2java
 
-import org.gradle.api.tasks.*
+import org.gradle.api.provider.ListProperty
+import org.gradle.api.provider.Property
+import org.gradle.api.tasks.Input
+import org.gradle.api.tasks.Optional
 
-import java.nio.charset.Charset
-
-class Wsdl2JavaPluginExtension {
-
-    private static final DEFAULT_WSDL_DIR = "src/main/resources/wsdl"
-
-    @InputDirectory
-    @PathSensitive(PathSensitivity.ABSOLUTE)
-    File wsdlDir = new File(DEFAULT_WSDL_DIR)
+interface Wsdl2JavaPluginExtension {
 
     @Input
-    List<List<Object>> wsdlsToGenerate
+    Property<String> getWsdlDir()
 
     @Input
-    Locale locale = Locale.getDefault()
-
-    @Input
-    String encoding = Charset.defaultCharset().name()
-
-    @Input
-    LineEnding lineEnding = LineEnding.PLATFORM_NATIVE
-
-    @Input
-    boolean stabilize = false
-
-    @Input
-    boolean stabilizeAndMergeObjectFactory = false
-
-    @Input
-    String cxfVersion = "4.1.2"
-
-    @Input
-    String cxfPluginVersion = "4.1.2"
-
-    @Input
-    String cxfToolsVersion = "4.2.0"
+    ListProperty<List<String>> getWsdlsToGenerate()
 
     @Optional
     @Input
-    String namespacePrefixVersion
+    Property<Locale> getLocale()
 
     @Optional
     @Input
-    String jax2bBasicsVersion
+    Property<String> getEncoding()
 
+    @Optional
     @Input
-    String generatedWsdlDir = "build/generated/wsdl"
+    Property<LineEnding> getLineEnding()
+
+    @Optional
+    @Input
+    Property<Boolean> getStabilize()
+
+    @Optional
+    @Input
+    Property<Boolean> getStabilizeAndMergeObjectFactory()
+
+    @Optional
+    @Input
+    Property<String> getGeneratedWsdlDir()
 
 }

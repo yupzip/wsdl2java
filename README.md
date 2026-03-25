@@ -2,11 +2,13 @@
 
 * Version 4.0.0
   * Plugin built with Gradle 9.4.1
-  * cxfVersion - 4.1.2 default
-  * cxfPluginVersion - 4.1.2 default
-  * cxfToolsVersion - 4.1.2 default
-  * namespacePrefixVersion - new optional property to include org.jvnet.jaxb2_commons:jaxb2-namespace-prefix dependency
-  * jax2bBasicsVersion - new optional property to include codes.rafael.jaxb2_commons:jaxb2-basics dependency
+  * CXF Tool version 4.1.2
+  * CXF Plugin version 4.1.2
+  * CXF Tools version 4.2.0
+  * JAXB2 naming prefix version 2.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
+  * JAXB2 basic plugins version 3.0.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
+  * wsdlDir property is now a string
+  * generatedWsdlDir property is now a string
 * Version 3.0.1 - adaption for Gradle 9
 * Version 3.0.0 contains a breaking change: 'cxfVersion' and 'cxfPluginVersion' properties are now required.
 * This plugin is forked from deprecated nilsmagnus/wsdl2java to make the plugin compatible with Gradle 7+. 
@@ -27,7 +29,6 @@ Contributions are welcome.
 
 ### CXF
 This plugin uses the apache-cxf tools to do the actual work.
-(Version can be specified in gradle task configuration)
 
 ### Tasks
 
