@@ -2,6 +2,7 @@
 
 * Version 4.0.0
   * Plugin built with Gradle 9.4.1
+  * JDK 17+ required
   * CXF Tool version 4.1.2 (cxfVersion property removed)
   * CXF Plugin version 4.1.2 (cxfPlugin property removed)
   * CXF Tools version 4.2.0
@@ -9,6 +10,10 @@
   * JAXB2 basic plugins version 3.0.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
   * wsdlDir property is now a string
   * generatedWsdlDir property is now a string
+  * inclusion of generated classes in source to be configured in build.gradle, e.g.:
+    ```groovy
+    sourceSets.main.java.srcDirs "src/generated-sources/java"
+    ```
 * Version 3.0.1 - adaption for Gradle 9
 * Version 3.0.0 contains a breaking change: 'cxfVersion' and 'cxfPluginVersion' properties are now required.
 * This plugin is forked from deprecated nilsmagnus/wsdl2java to make the plugin compatible with Gradle 7+. 

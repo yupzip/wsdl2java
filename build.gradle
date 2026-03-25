@@ -11,8 +11,8 @@ group = 'com.yupzip'
 version = '4.0.0'
 
 compileJava {
-    sourceCompatibility = JavaVersion.VERSION_25
-    targetCompatibility = JavaVersion.VERSION_25
+    sourceCompatibility = JavaVersion.VERSION_17
+    targetCompatibility = JavaVersion.VERSION_17
     options.compilerArgs << '-parameters'
 }
 
@@ -40,19 +40,19 @@ gradlePlugin {
     website = 'https://github.com/yupzip/wsdl2java'
     vcsUrl = 'https://github.com/yupzip/wsdl2java'
     plugins {
-        wsdl2java {
+        create('wsdl2java') {
             id = 'com.yupzip.wsdl2java'
             implementationClass = 'com.yupzip.wsdl2java.Wsdl2JavaPlugin'
             displayName = 'com.yupzip.wsdl2java'
             description = 'Generate java code form wsdl/xsd with cxf'
-            tags = ['wsdl2java']
+            tags.set(['wsdl2java'])
         }
     }
 }
 
 publishing {
     publications {
-        maven(MavenPublication) {
+        create('mavenPublication', MavenPublication) {
             from components.java
         }
     }
