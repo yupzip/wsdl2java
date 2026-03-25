@@ -2,17 +2,19 @@ plugins {
     id "groovy"
     id "maven-publish"
     id "java-gradle-plugin"
-    id 'com.gradle.plugin-publish' version '0.14.0'
+    id 'com.gradle.plugin-publish' version '2.1.0'
     id 'idea'
     id 'eclipse'
 }
 
 group = 'com.yupzip'
-version = '3.0.1'
+version = '4.0.0'
 
-// stay compatible with the crowd
-sourceCompatibility = JavaVersion.VERSION_1_6
-targetCompatibility = JavaVersion.VERSION_1_6
+compileJava {
+    sourceCompatibility = JavaVersion.VERSION_25
+    targetCompatibility = JavaVersion.VERSION_25
+    options.compilerArgs << '-parameters'
+}
 
 repositories {
     mavenCentral()
@@ -21,13 +23,9 @@ repositories {
 dependencies {
     implementation localGroovy()
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.5.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.5.2'
     testImplementation gradleTestKit()
 
-    runtimeOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:1.3.61"
-
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.5.2'
+    runtimeOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20"
 }
 
 java {
@@ -39,20 +37,17 @@ test {
 }
 
 gradlePlugin {
+    website = 'https://github.com/yupzip/wsdl2java'
+    vcsUrl = 'https://github.com/yupzip/wsdl2java'
     plugins {
         wsdl2java {
             id = 'com.yupzip.wsdl2java'
             implementationClass = 'com.yupzip.wsdl2java.Wsdl2JavaPlugin'
             displayName = 'com.yupzip.wsdl2java'
             description = 'Generate java code form wsdl/xsd with cxf'
+            tags = ['wsdl2java']
         }
     }
-}
-
-pluginBundle {
-    website = 'https://github.com/yupzip/wsdl2java'
-    vcsUrl = 'https://github.com/yupzip/wsdl2java'
-    tags = ['wsdl2java']
 }
 
 publishing {
@@ -64,7 +59,5 @@ publishing {
 }
 
 wrapper {
-    gradleVersion = '6.0.1'
+    gradleVersion = '9.4.1'
 }
-
-build.doLast { uploadArchives }

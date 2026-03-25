@@ -31,15 +31,23 @@ class Wsdl2JavaPluginExtension {
     boolean stabilizeAndMergeObjectFactory = false
 
     @Input
-    String cxfVersion = null
+    String cxfVersion = "4.1.2"
 
     @Input
-    String cxfPluginVersion = null
+    String cxfPluginVersion = "4.1.2"
+
+    @Input
+    String cxfToolsVersion = "4.2.0"
+
+    @Optional
+    @Input
+    String namespacePrefixVersion
+
+    @Optional
+    @Input
+    String jax2bBasicsVersion
 
     @Input
     String generatedWsdlDir = "build/generated/wsdl"
-
-    @Input
-    boolean includeJava8XmlDependencies = true;
 
 }

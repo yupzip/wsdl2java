@@ -50,15 +50,15 @@ class Wsdl2JavaTask extends DefaultTask {
             File targetDir = new File(tmpDir, wsdlPath)
 
             argsCopy.add(argsCopy.size() - 1, '-d')
-            argsCopy.add(argsCopy.size() - 1, targetDir)
+            argsCopy.add(argsCopy.size() - 1, targetDir.getAbsolutePath())
             String[] wsdl2JavaArgs = new String[argsCopy.size()]
-            for (int i = 0; i < argsCopy.size(); i++)
+            for (int i = 0; i < argsCopy.size(); i++) {
                 wsdl2JavaArgs[i] = argsCopy[i]
+            }
 
             def wsdlToJava = classLoader.loadClass("org.apache.cxf.tools.wsdlto.WSDLToJava").getConstructor().newInstance()
             def toolContext = classLoader.loadClass("org.apache.cxf.tools.common.ToolContext").getConstructor().newInstance()
             wsdlToJava.args = wsdl2JavaArgs
-
             runWithLocale(extension.locale) { ->
                 try {
                     wsdlToJava.run(toolContext)
@@ -71,7 +71,7 @@ class Wsdl2JavaTask extends DefaultTask {
         }
     }
 
-    private void setupClassLoader() {
+    protected void setupClassLoader() {
         if (classpath?.files) {
             def urls = classpath.files.collect { it.toURI().toURL() }
 
@@ -108,7 +108,7 @@ class Wsdl2JavaTask extends DefaultTask {
         getProject().delete(packageTargetDirs)
     }
 
-    private Set<String> findPackagePaths() {
+    protected Set<String> findPackagePaths() {
         Set<String> packagePaths = new HashSet<>()
         for (List<String> args : extension.wsdlsToGenerate) {
             int packageArgIdx = args.indexOf("-p")
@@ -247,21 +247,21 @@ class Wsdl2JavaTask extends DefaultTask {
         }
     }
 
-    private void stabilizeObjFacWithItself(File target) {
+    protected void stabilizeObjFacWithItself(File target) {
         if (isObjectFactory(target)) {
             getLogger().info(" stabilize ${target}")
             ObjectFactoryMerger.merge(target, target, extension.encoding)
         }
     }
 
-    private stabilizeObjFacWithTarget(File src, File target) {
+    protected stabilizeObjFacWithTarget(File src, File target) {
         if (isObjectFactory(src) && src.getText(extension.encoding) != target.getText(extension.encoding)) {
             getLogger().info(" merge     ${target}")
             ObjectFactoryMerger.merge(src, target, extension.encoding)
         }
     }
 
-    private boolean isObjectFactory(File f) {
+    protected boolean isObjectFactory(File f) {
         return "ObjectFactory.java".equals(f.getName())
     }
 }
