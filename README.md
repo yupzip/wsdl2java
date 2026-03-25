@@ -1,7 +1,9 @@
 ### Note
 
 * Version 3.0.0 contains a breaking change: 'cxfVersion' and 'cxfPluginVersion' properties are now required.
+* Version 3.0.1 - adaption for Gradle 9
 * This plugin is forked from deprecated nilsmagnus/wsdl2java to make the plugin compatible with Gradle 7+. 
+* Upcoming 4.0.0 - Gradle 9+ with latest jaxb, jaxws, saaj, cxf-xjc dependencies 
 
 wsdl2java gradle plugin
 =========
@@ -41,7 +43,7 @@ Groovy:
 ```groovy
 plugins {
     id 'java'
-    id 'com.yupzip.wsdl2java' version '3.0.0'
+    id 'com.yupzip.wsdl2java' version '3.0.1'
 }
 ```
 
@@ -50,7 +52,7 @@ Kotlin:
 ```kotlin
 plugins {
     id("java")
-    id("com.yupzip.wsdl2java") version "3.0.0"
+    id("com.yupzip.wsdl2java") version "3.0.1"
 }
 ```
 
