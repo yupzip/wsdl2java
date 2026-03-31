@@ -12,7 +12,7 @@ class Wsdl2JavaPlugin implements Plugin<Project> {
 
     public static final String CXF_VERSION = "4.1.2"
     public static final String CXF_PLUGIN_VERSION = "4.1.2"
-    public static final String CXF_TOOLS_VERSION = "4.1.2"
+    public static final String CXF_TOOLS_VERSION = "4.2.0"
     public static final String JAXB2_NAMESPACE_PREFIX_VERSION = "2.0"
     public static final String JAXB2_BASICS_VERSION = "3.0.0"
 
