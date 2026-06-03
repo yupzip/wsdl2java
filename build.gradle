@@ -29,7 +29,7 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    runtimeOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21"
+    runtimeOnly 'org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21'
 }
 
 java {
