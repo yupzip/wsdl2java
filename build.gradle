@@ -5,7 +5,6 @@ plugins {
     id 'jacoco'
     id 'idea'
     id 'eclipse'
-    id 'com.github.kt3k.coveralls' version '2.12.2'
     id 'com.gradle.plugin-publish' version '2.1.0'
 }
 
@@ -50,10 +49,6 @@ jacocoTestReport {
     }
 }
 
-coveralls {
-    sourceDirs = ['src/main/groovy']
-}
-
 gradlePlugin {
     website = 'https://github.com/yupzip/wsdl2java'
     vcsUrl = 'https://github.com/yupzip/wsdl2java'
@@ -77,5 +72,5 @@ publishing {
 }
 
 wrapper {
-    gradleVersion = '9.4.1'
+    gradleVersion = '9.5.1'
 }
