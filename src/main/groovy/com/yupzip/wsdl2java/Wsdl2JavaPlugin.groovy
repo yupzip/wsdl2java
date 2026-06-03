@@ -3,6 +3,7 @@ package com.yupzip.wsdl2java
 
 import org.gradle.api.Plugin
 import org.gradle.api.Project
+import org.gradle.api.tasks.SourceSetContainer
 
 class Wsdl2JavaPlugin implements Plugin<Project> {
 
@@ -10,9 +11,9 @@ class Wsdl2JavaPlugin implements Plugin<Project> {
     public static final String WSDL2JAVA = "wsdl2java"
     public static final String WSDL2JAVA_TASK = "wsdl2javaTask"
 
-    public static final String CXF_VERSION = "4.1.2"
-    public static final String CXF_PLUGIN_VERSION = "4.1.2"
-    public static final String CXF_TOOLS_VERSION = "4.2.0"
+    public static final String CXF_VERSION = "4.2.0"
+    public static final String CXF_PLUGIN_VERSION = "4.2.0"
+    public static final String CXF_TOOLS_VERSION = "4.2.1"
     public static final String JAXB2_NAMESPACE_PREFIX_VERSION = "2.0"
     public static final String JAXB2_BASICS_VERSION = "3.0.0"
 
@@ -24,6 +25,7 @@ class Wsdl2JavaPlugin implements Plugin<Project> {
         extension.cxfToolsVersion.convention(CXF_TOOLS_VERSION)
         extension.jaxb2NamespacePrefixVersion.convention(JAXB2_NAMESPACE_PREFIX_VERSION)
         extension.jaxb2BasicsVersion.convention(JAXB2_BASICS_VERSION)
+        extension.generatedWsdlDir.convention(Wsdl2JavaTask.DEFAULT_GENERATED_WSDL_DIR)
 
         // Add new configuration for our plugin and add required dependencies to it.
         def wsdl2javaConfiguration = project.configurations.maybeCreate(WSDL2JAVA)
@@ -60,6 +62,14 @@ class Wsdl2JavaPlugin implements Plugin<Project> {
             task.classpath = wsdl2javaConfiguration
             task.extension = extension
         }
+
+        // Register the generated directory as a Java source directory so consumers
+        // don't have to add `sourceSets.main.java.srcDirs "..."` manually. Resolved
+        // lazily — `generatedWsdlDir` may be set by the user after plugin apply.
+        def mainSourceSet = project.extensions.getByType(SourceSetContainer).named("main").get()
+        mainSourceSet.java.srcDir(project.provider {
+            extension.generatedWsdlDir.getOrElse(Wsdl2JavaTask.DEFAULT_GENERATED_WSDL_DIR)
+        })
 
         project.tasks.named("compileJava").configure {
             it.dependsOn wsdl2JavaTask

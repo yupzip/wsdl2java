@@ -2,9 +2,11 @@ plugins {
     id "groovy"
     id "maven-publish"
     id "java-gradle-plugin"
-    id 'com.gradle.plugin-publish' version '2.1.0'
+    id 'jacoco'
     id 'idea'
     id 'eclipse'
+    id 'com.github.kt3k.coveralls' version '2.12.2'
+    id 'com.gradle.plugin-publish' version '2.1.0'
 }
 
 group = 'com.yupzip'
@@ -24,11 +26,11 @@ dependencies {
     implementation localGroovy()
 
     testImplementation gradleTestKit()
-    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation platform('org.junit:junit-bom:6.1.0')
     testImplementation 'org.junit.jupiter:junit-jupiter'
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
-    runtimeOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20"
+    runtimeOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.21"
 }
 
 java {
@@ -37,6 +39,19 @@ java {
 
 test {
     useJUnitPlatform()
+    finalizedBy jacocoTestReport
+}
+
+jacocoTestReport {
+    dependsOn test
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
+coveralls {
+    sourceDirs = ['src/main/groovy']
 }
 
 gradlePlugin {

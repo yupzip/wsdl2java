@@ -1,5 +1,8 @@
 # wsdl2java Gradle plugin
 
+[![Build](https://github.com/yupzip/wsdl2java/actions/workflows/build.yml/badge.svg)](https://github.com/yupzip/wsdl2java/actions/workflows/build.yml)
+[![Coverage Status](https://coveralls.io/repos/github/yupzip/wsdl2java/badge.svg?branch=master)](https://coveralls.io/github/yupzip/wsdl2java?branch=master)
+
 Gradle plugin for generating Java classes from WSDL files, using [Apache CXF](https://cxf.apache.org/) under the hood.
 
 Maintained fork of the deprecated [nilsmagnus/wsdl2java](https://github.com/nilsmagnus/wsdl2java), updated for modern Gradle and current CXF / JAXB versions.
@@ -44,11 +47,7 @@ wsdl2java {
 }
 ```
 
-### Include the generated sources in compilation
-
-```groovy
-sourceSets.main.java.srcDirs "src/generated-sources/java"
-```
+The plugin automatically adds `generatedWsdlDir` (default: `build/generated/wsdl`) to `sourceSets.main.java.srcDirs`, so the generated classes compile without any further setup.
 
 ## Tasks
 
@@ -77,9 +76,9 @@ The plugin resolves CXF tooling against a fixed set of versions by default. Each
 
 | Option                          | Default | Affects                                                                                                       |
 |---------------------------------|---------|---------------------------------------------------------------------------------------------------------------|
-| `cxfVersion`                    | `4.1.2` | `org.apache.cxf.xjc-utils:cxf-xjc-runtime`                                                                    |
-| `cxfPluginVersion`              | `4.1.2` | `org.apache.cxf.xjcplugins:cxf-xjc-ts`, `org.apache.cxf.xjcplugins:cxf-xjc-boolean`                           |
-| `cxfToolsVersion`               | `4.2.0` | `org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb`, `org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws`          |
+| `cxfVersion`                    | `4.2.0` | `org.apache.cxf.xjc-utils:cxf-xjc-runtime`                                                                    |
+| `cxfPluginVersion`              | `4.2.0` | `org.apache.cxf.xjcplugins:cxf-xjc-ts`, `org.apache.cxf.xjcplugins:cxf-xjc-boolean`                           |
+| `cxfToolsVersion`               | `4.2.1` | `org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb`, `org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws`          |
 | `jaxb2NamespacePrefixVersion`   | `2.0`   | `org.jvnet.jaxb2_commons:jaxb2-namespace-prefix`                                                              |
 | `jaxb2BasicsVersion`            | `3.0.0` | `codes.rafael.jaxb2_commons:jaxb2-basics`, `codes.rafael.jaxb2_commons:jaxb2-basics-runtime`                  |
 
@@ -87,9 +86,9 @@ Example:
 
 ```groovy
 wsdl2java {
-    cxfVersion       = "4.1.3"
-    cxfPluginVersion = "4.1.3"
-    cxfToolsVersion  = "4.2.1"
+    cxfVersion       = "4.1.2"
+    cxfPluginVersion = "4.1.2"
+    cxfToolsVersion  = "4.2.0"
     // …rest of config
 }
 ```
@@ -108,7 +107,7 @@ If you already declare these explicitly (any version), the plugin leaves them al
 ```groovy
 plugins {
     id "java"
-    id "org.springframework.boot" version "4.0.4"
+    id "org.springframework.boot" version "4.0.6"
     id "io.spring.dependency-management" version "1.7.0"
     id "com.yupzip.wsdl2java" version "4.1.0"
 }
@@ -122,8 +121,6 @@ compileJava {
     targetCompatibility = JavaVersion.VERSION_25
     options.compilerArgs << '-parameters'
 }
-
-sourceSets.main.java.srcDirs "src/generated-sources/java"
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
@@ -187,14 +184,16 @@ Prefer `$projectDir` over absolute paths in your build file, as shown above. Thi
 ## Changelog
 
 - **4.1.0**
-  - Dependency versions are configurable again, this time via extension properties (`cxfVersion`, `cxfPluginVersion`, `cxfToolsVersion`, `jaxb2NamespacePrefixVersion`, `jaxb2BasicsVersion`). Defaults match the previous 4.0.0 versions, so builds that don't set them behave the same.
+  - Dependency versions are configurable again via extension properties (`cxfVersion`, `cxfPluginVersion`, `cxfToolsVersion`, `jaxb2NamespacePrefixVersion`, `jaxb2BasicsVersion`).
+  - Default version bumps: CXF 4.1.2 → 4.2.0, CXF tools 4.2.0 → 4.2.1, CXF xjc plugins 4.1.2 → 4.2.0. Consumers on Jakarta EE 10 stacks can pin the previous versions via the new extension properties.
+  - `generatedWsdlDir` is now automatically registered on `sourceSets.main.java.srcDirs` — consumers no longer need to add it manually in their `build.gradle`.
   - Bug fixes:
     - `wsdlDir` extension setting is now actually honored by the task's up-to-date input check (was silently pinned to the default).
     - Input directory uses `PathSensitivity.RELATIVE`, so the cacheable task can reuse outputs across different checkout paths and CI agents.
     - `stripCommentDates` (under `stabilize`) matches any year — previously only stripped dates starting with `201…`, so the option was a no-op for anything generated from 2020 onwards.
     - `findPackagePaths` no longer throws `IndexOutOfBoundsException` when `-p` is the last argument in a `wsdlsToGenerate` entry.
     - The thread context classloader is restored after task execution, preventing CXF/JAXB classes from being pinned across Gradle daemon invocations.
-  - Unit tests covering plugin functionality
+  - Unit tests covering plugin functionality, plus CI build and Coveralls coverage reporting.
 - **4.0.0**
   - Built and tested against Gradle 9.4.1; requires JDK 17+.
   - Default upgrades: CXF 4.1.2, CXF tools 4.2.0, jaxb2-namespace-prefix 2.0, jaxb2-basics 3.0.0.

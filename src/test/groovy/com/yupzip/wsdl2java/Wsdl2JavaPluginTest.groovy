@@ -3,6 +3,7 @@ package com.yupzip.wsdl2java
 import org.gradle.api.Project
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.internal.artifacts.configurations.ConfigurationInternal
+import org.gradle.api.tasks.SourceSetContainer
 import org.gradle.testfixtures.ProjectBuilder
 import org.junit.jupiter.api.Test
 
@@ -118,5 +119,34 @@ class Wsdl2JavaPluginTest {
 
         assertEquals(1, matches.size(), "user-declared cxf-xjc-runtime must not be duplicated")
         assertEquals("1.2.3", matches[0].version)
+    }
+
+    @Test
+    void apply_addsDefaultGeneratedDirToMainJavaSourceSet() {
+        Project project = appliedProject()
+        def srcDirs = project.extensions.getByType(SourceSetContainer)
+                .named('main').get().java.srcDirs
+                .collect { it.path.replace('\\', '/') }
+
+        assertTrue(
+                srcDirs.any { it.endsWith('build/generated/wsdl') },
+                "expected default generated dir on main java source set, got: ${srcDirs}"
+        )
+    }
+
+    @Test
+    void apply_customGeneratedWsdlDirIsRegisteredAsSourceDir() {
+        Project project = appliedProject()
+        def extension = project.extensions.getByType(Wsdl2JavaPluginExtension)
+        extension.generatedWsdlDir.set('src/generated-sources/java')
+
+        def srcDirs = project.extensions.getByType(SourceSetContainer)
+                .named('main').get().java.srcDirs
+                .collect { it.path.replace('\\', '/') }
+
+        assertTrue(
+                srcDirs.any { it.endsWith('src/generated-sources/java') },
+                "expected user-configured generated dir on main java source set, got: ${srcDirs}"
+        )
     }
 }
