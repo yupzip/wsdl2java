@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'com.yupzip'
-version = '4.0.0'
+version = '4.1.0'
 
 compileJava {
     sourceCompatibility = JavaVersion.VERSION_17
@@ -24,6 +24,9 @@ dependencies {
     implementation localGroovy()
 
     testImplementation gradleTestKit()
+    testImplementation platform('org.junit:junit-bom:5.10.2')
+    testImplementation 'org.junit.jupiter:junit-jupiter'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     runtimeOnly "org.jetbrains.kotlin:kotlin-gradle-plugin:2.3.20"
 }

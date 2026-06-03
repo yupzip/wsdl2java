@@ -1,61 +1,24 @@
-### Note
+# wsdl2java Gradle plugin
 
-* Version 4.0.0
-  * Plugin built with Gradle 9.4.1
-  * JDK 17+ required
-  * CXF Tool version 4.1.2 (cxfVersion property removed)
-  * CXF Plugin version 4.1.2 (cxfPlugin property removed)
-  * CXF Tools version 4.2.0
-  * JAXB2 naming prefix version 2.0 (org.jvnet.jaxb2_commons:jaxb2-namespace-prefix)
-  * JAXB2 basic plugins version 3.0.0 (org.codes.rafael.jaxb2_commons:jaxb2-basics)
-  * wsdlDir property is now a string
-  * generatedWsdlDir property is now a string
-  * inclusion of generated classes in source to be configured in build.gradle, e.g.:
-    ```groovy
-    sourceSets.main.java.srcDirs "src/generated-sources/java"
-    ```
-* Version 3.0.1 - adaption for Gradle 9
-* Version 3.0.0 contains a breaking change: 'cxfVersion' and 'cxfPluginVersion' properties are now required.
-* This plugin is forked from deprecated nilsmagnus/wsdl2java to make the plugin compatible with Gradle 7+. 
+Gradle plugin for generating Java classes from WSDL files, using [Apache CXF](https://cxf.apache.org/) under the hood.
 
-wsdl2java gradle plugin
-=========
-Gradle plugin for generating java classes from wsdl using CXF under the hood.
+Maintained fork of the deprecated [nilsmagnus/wsdl2java](https://github.com/nilsmagnus/wsdl2java), updated for modern Gradle and current CXF / JAXB versions.
 
-### Issues
-If you have any issues with the plugin, please file an issue at github, https://github.com/yupzip/wsdl2java/issues
+## Requirements
 
-### Contribution
-Contributions are welcome.
-
-#### Contributors
-- Peter Vermes , https://github.com/yupzip
-- Nicklas Bondesson , https://github.com/nicklasbondesson
-- https://github.com/cstsw
-
-### CXF
-This plugin uses the apache-cxf tools to do the actual work.
-
-### Tasks
-
-| Name | Description | Dependecy |
-| ---- | ----------- | --------- |
-| wsdl2javaTask | Generate java source from wsdl-files | CompileJava/CompileKotlin depends on wsdl2java |
+- Gradle 7+ (built and tested against Gradle 9.5.1)
+- JDK 17 or newer
 
 ## Usage
 
-To use this plugin, you must
-- apply the plugin
-- set the properties of the plugin
-
-### Applying the plugin
+### Apply the plugin
 
 Groovy:
 
 ```groovy
 plugins {
     id 'java'
-    id 'com.yupzip.wsdl2java' version '4.0.0'
+    id 'com.yupzip.wsdl2java' version '4.1.0'
 }
 ```
 
@@ -64,55 +27,90 @@ Kotlin:
 ```kotlin
 plugins {
     id("java")
-    id("com.yupzip.wsdl2java") version "4.0.0"
+    id("com.yupzip.wsdl2java") version "4.1.0"
 }
 ```
 
-### Plugin options
-
-| Option                         | Default value             | Description                                                                                                                                                                                                                                                                                                                                                  |
-|--------------------------------|---------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| wsdlDir                        | src/main/resources        | Define the wsdl files directory to support incremental build. This means that the task will be up-to-date if nothing in this directory has changed.                                                                                                                                                                                                          |
-| wsdlsToGenerate                | empty                     | This is the main input to the plugin that defines the wsdls to process. It is a list of arguments where each argument is a list of arguments to process a wsdl-file. The Wsdl-file with full path is the last argument. The array can be supplied with the same options as described for the maven-cxf plugin(http://cxf.apache.org/docs/wsdl-to-java.html). |
-| generatedWsdlDir               | build/generated/wsdl      | Destination directory for generated sources. The task will be up-to-date if nothing in this directory changes between builds.                                                                                                                                                                                                                                |
-| locale                         | Locale.getDefault()       | The locale for the generated sources – especially the JavaDoc. This might be necessary to prevent differing sources due to several development environments.                                                                                                                                                                                                 |
-| encoding                       | platform default encoding | Set the encoding name for generated sources, such as EUC-JP or UTF-8.                                                                                                                                                                                                                                                                                        |
-| stabilizeAndMergeObjectFactory | false                     | If multiple WSDLs target the same package, merge their `ObjectFactory` classes.                                                                                                                                                                                                                                                                              |
-
-Example setting of options:
-
-Groovy:
+### Configure
 
 ```groovy
 wsdl2java {
-    wsdlDir = "src/main/resources/myWsdlFiles"
-    wsdlsToGenerate = [   //  2d-array of wsdls and cxf-parameters
-            ['src/main/resources/wsdl/firstwsdl.wsdl'],
-            ['-xjc','-b','bindingfile.xml','src/main/resources/wsdl/secondwsdl.wsdl']
+    wsdlDir = "src/main/resources/wsdl"
+    wsdlsToGenerate = [
+        ['src/main/resources/wsdl/firstwsdl.wsdl'],
+        ['-xjc', '-b', 'bindingfile.xml', 'src/main/resources/wsdl/secondwsdl.wsdl']
     ]
     locale = Locale.GERMANY
 }
 ```
-    
-Kotlin:
 
-```kotlin
+### Include the generated sources in compilation
+
+```groovy
+sourceSets.main.java.srcDirs "src/generated-sources/java"
+```
+
+## Tasks
+
+| Name            | Description                                                                                                                  |
+|-----------------|------------------------------------------------------------------------------------------------------------------------------|
+| `wsdl2javaTask` | Generates Java sources from WSDL files. Wired as a dependency of `compileJava` (and of `compileKotlin` when Kotlin applies). |
+
+## Plugin options
+
+### Generation
+
+| Option                           | Type                 | Default                   | Description                                                                                                                                                                                  |
+|----------------------------------|----------------------|---------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `wsdlDir`                        | `String`             | `src/main/resources/wsdl` | Source directory of WSDL files. Used for the incremental-build input check — changes here invalidate the cached task output.                                                                 |
+| `wsdlsToGenerate`                | `List<List<String>>` | _required_                | 2D list of CXF `wsdl-to-java` argument vectors. The **last** element of each inner list must be the WSDL path. See the [CXF reference](http://cxf.apache.org/docs/wsdl-to-java.html).        |
+| `generatedWsdlDir`               | `String`             | `build/generated/wsdl`    | Destination directory for generated sources.                                                                                                                                                 |
+| `locale`                         | `Locale`             | `Locale.getDefault()`     | Locale used while CXF generates JavaDoc. Set explicitly for reproducible output across machines.                                                                                             |
+| `encoding`                       | `String`             | platform default          | Encoding for the generated source files (e.g. `UTF-8`, `EUC-JP`).                                                                                                                            |
+| `lineEnding`                     | `LineEnding`         | `PLATFORM_NATIVE`         | Line endings in the generated files. One of `PLATFORM_NATIVE`, `WINDOWS` (`\r\n`), `UNIX` (`\n`), `MAC_CLASSIC` (`\r`).                                                                      |
+| `stabilize`                      | `boolean`            | `false`                   | Post-process generated sources to produce diff-friendly output: strip generation timestamps and stable-sort `@XmlSeeAlso`, `@XmlElementRef`, and consecutive `{@link …}` JavaDoc lines.       |
+| `stabilizeAndMergeObjectFactory` | `boolean`            | `false`                   | When multiple WSDLs target the same Java package, merge their generated `ObjectFactory` classes into a single, stably ordered file instead of letting the last write win.                    |
+
+### Dependency versions
+
+The plugin resolves CXF tooling against a fixed set of versions by default. Each is overridable via the extension:
+
+| Option                          | Default | Affects                                                                                                       |
+|---------------------------------|---------|---------------------------------------------------------------------------------------------------------------|
+| `cxfVersion`                    | `4.1.2` | `org.apache.cxf.xjc-utils:cxf-xjc-runtime`                                                                    |
+| `cxfPluginVersion`              | `4.1.2` | `org.apache.cxf.xjcplugins:cxf-xjc-ts`, `org.apache.cxf.xjcplugins:cxf-xjc-boolean`                           |
+| `cxfToolsVersion`               | `4.2.0` | `org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb`, `org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws`          |
+| `jaxb2NamespacePrefixVersion`   | `2.0`   | `org.jvnet.jaxb2_commons:jaxb2-namespace-prefix`                                                              |
+| `jaxb2BasicsVersion`            | `3.0.0` | `codes.rafael.jaxb2_commons:jaxb2-basics`, `codes.rafael.jaxb2_commons:jaxb2-basics-runtime`                  |
+
+Example:
+
+```groovy
 wsdl2java {
-    wsdlDir = "$projectDir/src/main/wsdl"
-    wsdlsToGenerate = listOf(
-        listOf("$wsdlDir/firstwsdl.wsdl"),
-        listOf("-xjc", "-b", "bindingfile.xml", "$wsdlDir/secondwsdl.wsdl")
-    )
+    cxfVersion       = "4.1.3"
+    cxfPluginVersion = "4.1.3"
+    cxfToolsVersion  = "4.2.1"
+    // …rest of config
 }
 ```
 
-## Example gradle configuration for Spring Boot 4+ with jakarta namespace
+## Auto-injected runtime dependencies
+
+So that generated code compiles and runs without extra setup, the plugin adds the following to your `implementation` configuration if they aren't already declared:
+
+- `org.apache.cxf.xjc-utils:cxf-xjc-runtime` (at `cxfVersion`)
+- `codes.rafael.jaxb2_commons:jaxb2-basics-runtime` (at `jaxb2BasicsVersion`)
+
+If you already declare these explicitly (any version), the plugin leaves them alone.
+
+## Complete example — Spring Boot 4 with the Jakarta namespace
+
 ```groovy
 plugins {
     id "java"
     id "org.springframework.boot" version "4.0.4"
     id "io.spring.dependency-management" version "1.7.0"
-    id "com.yupzip.wsdl2java" version "4.0.0"
+    id "com.yupzip.wsdl2java" version "4.1.0"
 }
 
 bootJar {
@@ -139,13 +137,13 @@ dependencies {
     implementation 'com.sun.xml.bind:jaxb-impl:4.0.6'
     implementation 'com.sun.xml.messaging.saaj:saaj-impl:3.0.4'
     implementation 'com.sun.xml.ws:jaxws-ri:4.0.3'
-    
+
     implementation 'io.swagger.core.v3:swagger-jaxrs2-jakarta:2.2.7'
-    
+
     implementation 'jakarta.xml.bind:jakarta.xml.bind-api:4.0.5'
     implementation 'jakarta.xml.soap:jakarta.xml.soap-api:3.0.2'
     implementation 'jakarta.xml.ws:jakarta.xml.ws-api:4.0.3'
-    
+
     implementation 'org.glassfish.jaxb:jaxb-runtime:4.0.6'
 }
 
@@ -159,8 +157,8 @@ wsdl2java {
     wsdlsToGenerate = [
             ['-xjc',
              '-xjc-Xnamespace-prefix',
-             '-b',"$projectDir/src/main/resources/wsdl/wsdlBindings.xml",
-             '-b',"$projectDir/src/main/resources/wsdl/wsdlTypeDefBindings.xjb",
+             '-b', "$projectDir/src/main/resources/wsdl/wsdlBindings.xml",
+             '-b', "$projectDir/src/main/resources/wsdl/wsdlTypeDefBindings.xjb",
              '-wsdlLocation', 'classPath:wsdl/myWsdl.wsdl',
              '-p', 'my.package',
              '-autoNameResolution',
@@ -169,18 +167,57 @@ wsdl2java {
             ],
             ['-xjc',
              '-xjc-Xnamespace-prefix',
-             '-b',"$projectDir/src/main/resources/wsdl/wsdlBindings2.xml",
-             '-b',"$projectDir/src/main/resources/wsdl/wsdlTypeDefBindings2.xjb",
+             '-b', "$projectDir/src/main/resources/wsdl/wsdlBindings2.xml",
+             '-b', "$projectDir/src/main/resources/wsdl/wsdlTypeDefBindings2.xjb",
              '-wsdlLocation', 'classPath:wsdl/myWsdl2.wsdl',
              '-p', 'my.package',
              '-autoNameResolution',
              '-verbose',
-             "$projectDir/src/main/resources/wsdl/myWsdl2.wsdl"]
+             "$projectDir/src/main/resources/wsdl/myWsdl2.wsdl"
+            ]
     ]
     generatedWsdlDir = "src/generated-sources/java"
 }
 ```
 
-### A notice on multi-module projects
+### Multi-module projects
 
-Instead of referring to absolute paths in your build-file, try using $projectDir as a prefix to your files and directories. As shown in the "Complete example usage".
+Prefer `$projectDir` over absolute paths in your build file, as shown above. This keeps the build portable across developer machines and CI agents.
+
+## Changelog
+
+- **4.1.0**
+  - Dependency versions are configurable again, this time via extension properties (`cxfVersion`, `cxfPluginVersion`, `cxfToolsVersion`, `jaxb2NamespacePrefixVersion`, `jaxb2BasicsVersion`). Defaults match the previous 4.0.0 versions, so builds that don't set them behave the same.
+  - Bug fixes:
+    - `wsdlDir` extension setting is now actually honored by the task's up-to-date input check (was silently pinned to the default).
+    - Input directory uses `PathSensitivity.RELATIVE`, so the cacheable task can reuse outputs across different checkout paths and CI agents.
+    - `stripCommentDates` (under `stabilize`) matches any year — previously only stripped dates starting with `201…`, so the option was a no-op for anything generated from 2020 onwards.
+    - `findPackagePaths` no longer throws `IndexOutOfBoundsException` when `-p` is the last argument in a `wsdlsToGenerate` entry.
+    - The thread context classloader is restored after task execution, preventing CXF/JAXB classes from being pinned across Gradle daemon invocations.
+  - Unit tests covering plugin functionality
+- **4.0.0**
+  - Built and tested against Gradle 9.4.1; requires JDK 17+.
+  - Default upgrades: CXF 4.1.2, CXF tools 4.2.0, jaxb2-namespace-prefix 2.0, jaxb2-basics 3.0.0.
+  - The previous project-level `cxfVersion` / `cxfPluginVersion` properties are removed.
+  - `wsdlDir` and `generatedWsdlDir` are now plain `String` properties (previously `File`).
+  - Inclusion of generated classes in source sets must now be configured in `build.gradle`:
+    ```groovy
+    sourceSets.main.java.srcDirs "src/generated-sources/java"
+    ```
+- **3.0.1** — adaptation for Gradle 9.
+- **3.0.0** — breaking change: `cxfVersion` and `cxfPluginVersion` introduced as required project properties.
+- Forked from the deprecated [nilsmagnus/wsdl2java](https://github.com/nilsmagnus/wsdl2java) to keep the plugin compatible with Gradle 7+.
+
+## Issues
+
+Please file an issue at https://github.com/yupzip/wsdl2java/issues.
+
+## Contributing
+
+Contributions are welcome.
+
+### Contributors
+
+- Peter Vermes — https://github.com/yupzip
+- Nicklas Bondesson — https://github.com/nicklasbondesson
+- https://github.com/cstsw

@@ -37,4 +37,24 @@ interface Wsdl2JavaPluginExtension {
     @Input
     Property<String> getGeneratedWsdlDir()
 
+    @Optional
+    @Input
+    Property<String> getCxfVersion()
+
+    @Optional
+    @Input
+    Property<String> getCxfPluginVersion()
+
+    @Optional
+    @Input
+    Property<String> getCxfToolsVersion()
+
+    @Optional
+    @Input
+    Property<String> getJaxb2NamespacePrefixVersion()
+
+    @Optional
+    @Input
+    Property<String> getJaxb2BasicsVersion()
+
 }

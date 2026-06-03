@@ -2,6 +2,7 @@ package com.yupzip.wsdl2java
 
 import groovy.io.FileType
 import org.gradle.api.DefaultTask
+import org.gradle.api.GradleException
 import org.gradle.api.artifacts.Configuration
 import org.gradle.api.tasks.*
 
@@ -24,12 +25,14 @@ class Wsdl2JavaTask extends DefaultTask {
     @Nested
     Wsdl2JavaPluginExtension extension
 
-    @InputDirectory
-    @PathSensitive(PathSensitivity.ABSOLUTE)
-    File wsdlDir = new File(extension != null ? extension.wsdlDir.getOrElse(DEFAULT_WSDL_DIR) : DEFAULT_WSDL_DIR)
-
     @Internal
     File generatedWsdlDir
+
+    @InputDirectory
+    @PathSensitive(PathSensitivity.RELATIVE)
+    File getWsdlDir() {
+        return new File(extension != null ? extension.wsdlDir.getOrElse(DEFAULT_WSDL_DIR) : DEFAULT_WSDL_DIR)
+    }
 
     @OutputDirectory
     File getGeneratedWsdlFile() {
@@ -48,33 +51,40 @@ class Wsdl2JavaTask extends DefaultTask {
         if (classpath == null) {
             classpath = project.configurations.named(Wsdl2JavaPlugin.WSDL2JAVA).get()
         }
+        ClassLoader previousContextClassLoader = Thread.currentThread().contextClassLoader
         setupClassLoader()
-        assert classLoader != null
-        extension.wsdlsToGenerate.get().each { args ->
-            // Defensively copy the input args, because this might be a immutable implementation.
-            def argsCopy = args.collect() as List<Object>
+        if (classLoader == null) {
+            throw new GradleException("Failed to set up wsdl2java classloader")
+        }
+        try {
+            extension.wsdlsToGenerate.get().each { args ->
+                // Defensively copy the input args, because this might be a immutable implementation.
+                def argsCopy = args.collect() as List<Object>
 
-            String wsdlPath = md5.digest(argsCopy[-1].toString().bytes).encodeHex().toString()
-            File targetDir = new File(tmpDir, wsdlPath)
+                String wsdlPath = md5.digest(argsCopy[-1].toString().bytes).encodeHex().toString()
+                File targetDir = new File(tmpDir, wsdlPath)
 
-            argsCopy.add(argsCopy.size() - 1, '-d')
-            argsCopy.add(argsCopy.size() - 1, targetDir.getAbsolutePath())
-            String[] wsdl2JavaArgs = new String[argsCopy.size()]
-            for (int i = 0; i < argsCopy.size(); i++) {
-                wsdl2JavaArgs[i] = argsCopy[i]
-            }
-
-            def wsdlToJava = classLoader.loadClass("org.apache.cxf.tools.wsdlto.WSDLToJava").getConstructor().newInstance()
-            def toolContext = classLoader.loadClass("org.apache.cxf.tools.common.ToolContext").getConstructor().newInstance()
-            wsdlToJava.args = wsdl2JavaArgs
-            runWithLocale(extension.locale.getOrElse(Locale.getDefault())) { ->
-                try {
-                    wsdlToJava.run(toolContext)
-                } catch (Exception e) {
-                    throw new TaskExecutionException(this, e)
+                argsCopy.add(argsCopy.size() - 1, '-d')
+                argsCopy.add(argsCopy.size() - 1, targetDir.getAbsolutePath())
+                String[] wsdl2JavaArgs = new String[argsCopy.size()]
+                for (int i = 0; i < argsCopy.size(); i++) {
+                    wsdl2JavaArgs[i] = argsCopy[i]
                 }
+
+                def wsdlToJava = classLoader.loadClass("org.apache.cxf.tools.wsdlto.WSDLToJava").getConstructor().newInstance()
+                def toolContext = classLoader.loadClass("org.apache.cxf.tools.common.ToolContext").getConstructor().newInstance()
+                wsdlToJava.args = wsdl2JavaArgs
+                runWithLocale(extension.locale.getOrElse(Locale.getDefault())) { ->
+                    try {
+                        wsdlToJava.run(toolContext)
+                    } catch (Exception e) {
+                        throw new TaskExecutionException(this, e)
+                    }
+                }
+                copyToOutputDir(targetDir)
             }
-            copyToOutputDir(targetDir)
+        } finally {
+            Thread.currentThread().contextClassLoader = previousContextClassLoader
         }
     }
 
@@ -117,7 +127,7 @@ class Wsdl2JavaTask extends DefaultTask {
         for (List<String> args : extension.wsdlsToGenerate.get()) {
             int packageArgIdx = args.indexOf("-p")
             int packageIx = packageArgIdx + 1
-            if (packageArgIdx != -1 && args.size() >= packageIx) {
+            if (packageArgIdx != -1 && args.size() > packageIx) {
                 //check if it's wsdl-namespace=package
                 String[] maybeWsdlNameSpaceAndPackage = args.get(packageIx).split("=")
                 String packageName = maybeWsdlNameSpaceAndPackage.size() == 1 ? maybeWsdlNameSpaceAndPackage[0] : maybeWsdlNameSpaceAndPackage[1]
@@ -161,7 +171,7 @@ class Wsdl2JavaTask extends DefaultTask {
         String prevLine = ""
         for (ListIterator<String> lix = lines.listIterator(); lix.hasNext();) {
             String l = lix.next()
-            if (prevLine.contains("This class was generated") && l.startsWith(" * 201")) {
+            if (prevLine.contains("This class was generated") && l =~ /^ \* \d{4}[-.]\d{2}[-.]\d{2}/) {
                 lix.remove()
             }
             prevLine = l

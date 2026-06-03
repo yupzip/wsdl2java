@@ -19,26 +19,38 @@ class Wsdl2JavaPlugin implements Plugin<Project> {
     void apply(Project project) {
         project.apply(plugin: "java")
         def extension = project.extensions.create(WSDL2JAVA, Wsdl2JavaPluginExtension.class)
+        extension.cxfVersion.convention(CXF_VERSION)
+        extension.cxfPluginVersion.convention(CXF_PLUGIN_VERSION)
+        extension.cxfToolsVersion.convention(CXF_TOOLS_VERSION)
+        extension.jaxb2NamespacePrefixVersion.convention(JAXB2_NAMESPACE_PREFIX_VERSION)
+        extension.jaxb2BasicsVersion.convention(JAXB2_BASICS_VERSION)
+
         // Add new configuration for our plugin and add required dependencies to it.
         def wsdl2javaConfiguration = project.configurations.maybeCreate(WSDL2JAVA)
         wsdl2javaConfiguration.withDependencies {
-            it.add(project.dependencies.create("org.apache.cxf.xjc-utils:cxf-xjc-runtime:${CXF_VERSION}"))
-            it.add(project.dependencies.create("org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:${CXF_TOOLS_VERSION}"))
-            it.add(project.dependencies.create("org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:${CXF_TOOLS_VERSION}"))
-            it.add(project.dependencies.create("org.apache.cxf.xjcplugins:cxf-xjc-ts:${CXF_PLUGIN_VERSION}"))
-            it.add(project.dependencies.create("org.apache.cxf.xjcplugins:cxf-xjc-boolean:${CXF_PLUGIN_VERSION}"))
-            it.add(project.dependencies.create("org.jvnet.jaxb2_commons:jaxb2-namespace-prefix:${JAXB2_NAMESPACE_PREFIX_VERSION}"))
-            it.add(project.dependencies.create("codes.rafael.jaxb2_commons:jaxb2-basics:${JAXB2_BASICS_VERSION}"))
-            it.add(project.dependencies.create("codes.rafael.jaxb2_commons:jaxb2-basics-runtime:${JAXB2_BASICS_VERSION}"))
+            String cxfVer = extension.cxfVersion.get()
+            String cxfPluginVer = extension.cxfPluginVersion.get()
+            String cxfToolsVer = extension.cxfToolsVersion.get()
+            String jaxb2NsPrefixVer = extension.jaxb2NamespacePrefixVersion.get()
+            String jaxb2BasicsVer = extension.jaxb2BasicsVersion.get()
+            it.add(project.dependencies.create("org.apache.cxf.xjc-utils:cxf-xjc-runtime:${cxfVer}"))
+            it.add(project.dependencies.create("org.apache.cxf:cxf-tools-wsdlto-databinding-jaxb:${cxfToolsVer}"))
+            it.add(project.dependencies.create("org.apache.cxf:cxf-tools-wsdlto-frontend-jaxws:${cxfToolsVer}"))
+            it.add(project.dependencies.create("org.apache.cxf.xjcplugins:cxf-xjc-ts:${cxfPluginVer}"))
+            it.add(project.dependencies.create("org.apache.cxf.xjcplugins:cxf-xjc-boolean:${cxfPluginVer}"))
+            it.add(project.dependencies.create("org.jvnet.jaxb2_commons:jaxb2-namespace-prefix:${jaxb2NsPrefixVer}"))
+            it.add(project.dependencies.create("codes.rafael.jaxb2_commons:jaxb2-basics:${jaxb2BasicsVer}"))
+            it.add(project.dependencies.create("codes.rafael.jaxb2_commons:jaxb2-basics-runtime:${jaxb2BasicsVer}"))
         }
 
-        def implementationConfig = project.configurations.named(IMPLEMENTATION).getOrNull()
-        if (implementationConfig != null) {
-            if (!implementationConfig.allDependencies.any { dep -> dep.name == 'cxf-xjc-runtime'}) {
-                project.dependencies.add(IMPLEMENTATION, "org.apache.cxf.xjc-utils:cxf-xjc-runtime:${CXF_VERSION}")
-            }
-            if (!implementationConfig.allDependencies.any { dep -> dep.name == 'jaxb2-basics-runtime'}) {
-                project.dependencies.add(IMPLEMENTATION, "codes.rafael.jaxb2_commons:jaxb2-basics-runtime:${JAXB2_BASICS_VERSION}")
+        project.configurations.named(IMPLEMENTATION).configure { implementationConfig ->
+            implementationConfig.withDependencies { deps ->
+                if (!deps.any { dep -> dep.name == 'cxf-xjc-runtime' }) {
+                    project.dependencies.add(IMPLEMENTATION, "org.apache.cxf.xjc-utils:cxf-xjc-runtime:${extension.cxfVersion.get()}")
+                }
+                if (!deps.any { dep -> dep.name == 'jaxb2-basics-runtime' }) {
+                    project.dependencies.add(IMPLEMENTATION, "codes.rafael.jaxb2_commons:jaxb2-basics-runtime:${extension.jaxb2BasicsVersion.get()}")
+                }
             }
         }
 
@@ -53,7 +65,7 @@ class Wsdl2JavaPlugin implements Plugin<Project> {
             it.dependsOn wsdl2JavaTask
         }
 
-        if (project.tasks.findByName("compileKotlin") != null) {
+        project.plugins.withId("org.jetbrains.kotlin.jvm") {
             project.tasks.named("compileKotlin").configure {
                 it.dependsOn wsdl2JavaTask
             }
