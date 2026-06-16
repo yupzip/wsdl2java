@@ -186,11 +186,11 @@ Prefer `$projectDir` over absolute paths in your build file, as shown above. Thi
 - **4.1.0**
   - Dependency versions are configurable again via extension properties (`cxfVersion`, `cxfPluginVersion`, `cxfToolsVersion`, `jaxb2NamespacePrefixVersion`, `jaxb2BasicsVersion`).
   - Default version bumps: CXF 4.1.2 → 4.2.0, CXF tools 4.2.0 → 4.2.1, CXF xjc plugins 4.1.2 → 4.2.0. Consumers on Jakarta EE 10 stacks can pin the previous versions via the new extension properties.
-  - `generatedWsdlDir` is now automatically registered on `sourceSets.main.java.srcDirs` — consumers no longer need to add it manually in their `build.gradle`.
+  - `generatedWsdlDir` is now automatically registered on `sourceSets.main.java.srcDirs` (it doesn't have to be explicitly defined in the project's `build.gradle`).
   - Bug fixes:
     - `wsdlDir` extension setting is now actually honored by the task's up-to-date input check (was silently pinned to the default).
     - Input directory uses `PathSensitivity.RELATIVE`, so the cacheable task can reuse outputs across different checkout paths and CI agents.
-    - `stripCommentDates` (under `stabilize`) matches any year — previously only stripped dates starting with `201…`, so the option was a no-op for anything generated from 2020 onwards.
+    - `stripCommentDates` (under `stabilize`) matches any year (previously only stripped dates starting with `201…`, so the option was a no-op for anything generated from 2020 onwards)
     - `findPackagePaths` no longer throws `IndexOutOfBoundsException` when `-p` is the last argument in a `wsdlsToGenerate` entry.
     - The thread context classloader is restored after task execution, preventing CXF/JAXB classes from being pinned across Gradle daemon invocations.
   - Unit tests covering plugin functionality, plus CI build and Coveralls coverage reporting.
@@ -199,6 +199,7 @@ Prefer `$projectDir` over absolute paths in your build file, as shown above. Thi
   - Default upgrades: CXF 4.1.2, CXF tools 4.2.0, jaxb2-namespace-prefix 2.0, jaxb2-basics 3.0.0.
   - The previous project-level `cxfVersion` / `cxfPluginVersion` properties are removed.
   - `wsdlDir` and `generatedWsdlDir` are now plain `String` properties (previously `File`).
+  - The `includeJava8XmlDependencies` extension property is removed. It used to gate the auto-injection of a `javax.*` XML dependencies on Java 9+. With the move to the Jakarta namespace it is no longer applicable (consumers transitioning from Java EE to Jakarta EE who previously set this to `false` can simply remove the line).
   - Inclusion of generated classes in source sets must now be configured in `build.gradle`:
     ```groovy
     sourceSets.main.java.srcDirs "src/generated-sources/java"
